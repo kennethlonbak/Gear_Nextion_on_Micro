@@ -2,8 +2,8 @@
 
 // Initilizing joystick
 Joystick_ Joystick(0x04,
-	JOYSTICK_TYPE_JOYSTICK, 5, 0,
-	false, false, false, false, false, false,
+	JOYSTICK_TYPE_JOYSTICK, 2, 0,
+	true, false, false, false, false, false,
 	false, false, false, false, false);
 
 // Declaring variabels ------------------------------------------------------ //
@@ -14,10 +14,11 @@ int readSize = 0;
 int endofOutcomingMessageCount = 0;
 
 // Joystick
-int A0_val;
+int A0_val; // Shift up
 int A1_val;
-int A2_val;
+int A2_val; // Shift down
 int A3_val;
+bool set_by_gear = false;
 
 // Nextion ------------------------------------------------------------------- //
 void lineCodingEvent(long baud, byte databits, byte parity, byte charFormat){	newBaud = baud;}
@@ -49,7 +50,7 @@ void Serial_Read_and_Write(){
 // Joystick/buttons --------------------------------------------------------- //
 void read_and_set_buttons(){
     read_pins();
-    test_pin_input();
+    //test_pin_input();
     set_buttons();
 }
 void read_pins(){
@@ -60,7 +61,14 @@ void read_pins(){
 }
 
 void set_buttons(){
-  
+  // Shift up
+  if (A0_val < 350){Joystick.setXAxis(0);set_by_gear=true;} else {set_by_gear=false;} // engaging cluch at gear shift
+  if (A0_val < 300){Joystick.setButton(0,1);} else {Joystick.setButton(0,0);} 
+  // Shift down 
+  if (A2_val > 650){Joystick.setXAxis(0);set_by_gear=true;} 
+  if (A2_val > 700){Joystick.setButton(1,1);} else {Joystick.setButton(1,0);}
+  // Clutch
+  if (!set_by_gear) {Joystick.setXAxis(A2_val);}
 }
 
 void test_pin_input(){
@@ -86,12 +94,12 @@ void setup() {
 	Serial.begin(baud);
 	Serial1.begin(baud);
 
-  // Initilizing 
+  // Initilizing Joystick
 	Joystick.begin();
+  Joystick.setXAxisRange(0, 500);
  
   // Refresh gamepad even if the serial port not open
 	while (!Serial) {read_and_set_buttons();}
-
 }
 
 // Main loop ------------------------------------------------------------- //
