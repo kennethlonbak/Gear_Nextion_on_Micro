@@ -14,9 +14,10 @@ int readSize = 0;
 int endofOutcomingMessageCount = 0;
 
 // Joystick
-int butValue1;
-int butValue2;
-int butValue3;
+int A0_val;
+int A1_val;
+int A2_val;
+int A3_val;
 
 // Nextion ------------------------------------------------------------------- //
 void lineCodingEvent(long baud, byte databits, byte parity, byte charFormat){	newBaud = baud;}
@@ -46,31 +47,40 @@ void Serial_Read_and_Write(){
   }
 }
 // Joystick/buttons --------------------------------------------------------- //
-void readButtons() {
-	butValue1 = !digitalRead(2);
-	Joystick.setButton(0, butValue1);
-  
-  butValue2 = !digitalRead(3);
-  Joystick.setButton(1, butValue2);
-  
-  butValue3 = !digitalRead(4);
-  Joystick.setButton(2, butValue3);
+void read_and_set_buttons(){
+    read_pins();
+    test_pin_input();
+    set_buttons();
 }
-
 void read_pins(){
-  
+  A0_val = analogRead(0);
+  A1_val = analogRead(1);
+  A2_val = analogRead(2);
+  A3_val = analogRead(3);
 }
 
 void set_buttons(){
   
 }
 
+void test_pin_input(){
+  Serial.print("A0=");
+  Serial.print(A0_val);
+  Serial.print(", A1=");
+  Serial.print(A1_val);
+  Serial.print(", A2=");
+  Serial.print(A2_val);
+  Serial.print(", A3=");
+  Serial.println(A3_val);
+}
+
 // Initial setup ----------------------------------------------------------- //
 void setup() {
   // Initilizing pins 
-  pinMode(2, INPUT_PULLUP);
-  pinMode(3, INPUT_PULLUP);
-  pinMode(4, INPUT_PULLUP);
+  pinMode(A0, INPUT_PULLUP);
+  pinMode(A1, INPUT_PULLUP);
+  pinMode(A2, INPUT_PULLUP);
+  pinMode(A3, INPUT_PULLUP);
 
   // Initilizing Serial connection to Nextion and Virtual
 	Serial.begin(baud);
@@ -80,7 +90,7 @@ void setup() {
 	Joystick.begin();
  
   // Refresh gamepad even if the serial port not open
-	while (!Serial) {readButtons();}
+	while (!Serial) {read_and_set_buttons();}
 
 }
 
@@ -88,7 +98,7 @@ void setup() {
 void loop() {
 
   // Reading pin values and setting buttons
-	readButtons();
+	read_and_set_buttons();
 
   // Serial comunication
   Serial_Read_and_Write();
